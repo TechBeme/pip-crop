@@ -16,9 +16,10 @@ print("install:", t.install())
 t.m.navigate(f"http://127.0.0.1:8765/video.html?src={VIDEO}")
 time.sleep(1.5)
 pid = t.open_pip(wait=3.5)
-# park the PiP in the middle of the secondary monitor so growth stays on screen
-t.chrome("""const w=[...Services.wm.getEnumerator("Toolkit:PictureInPicture")].find(w => w.__testId === arguments[0]);
-  w.moveTo(3440 + 560, 225 + 300); await new Promise(r => setTimeout(r, 400)); return 1;""", pid)
+# park the PiP in the middle of the primary monitor so growth stays on screen
+ml, mt, mr, mb = W.primary_monitor()
+r0 = [x for x in t.pips() if x["id"] == pid][0]["crop"]["rect"]
+t.player_call(pid, "setRect", {"x": (ml + mr - r0["w"]) // 2, "y": (mt + mb - r0["h"]) // 2, "w": r0["w"], "h": r0["h"]})
 
 
 def state():

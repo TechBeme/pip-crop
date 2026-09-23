@@ -204,6 +204,14 @@ def monitors():
     return out
 
 
+def primary_monitor():
+    """(left, top, right, bottom) of the primary monitor, the one at (0, 0)."""
+    for m in monitors():
+        if m[0] <= 0 < m[2] and m[1] <= 0 < m[3]:
+            return m
+    return monitors()[0]
+
+
 def print_window(hwnd):
     """Capture a window's own content (even if covered) via PrintWindow
     with PW_RENDERFULLCONTENT. Returns a PIL image in physical pixels."""

@@ -71,7 +71,7 @@ def hold_drag(label, where, dx, dy, shift=True, capture=True):
                     foreign = True
             time.sleep(0.25)
             during = st()
-            real = [x["rect"] for x in W.windows() if x["cls"] == "MozillaDialogClass" and x["rect"][0] < 3440 and x["title"] == "Picture-in-Picture"]
+            real = [x["rect"] for x in W.windows() if x["cls"] == "MozillaDialogClass" and x["rect"][0] < W.primary_monitor()[2] and x["title"] == "Picture-in-Picture"]
             cap = verify(label + "_HOLDING", during) if capture else None
         finally:
             W.mouse_button(False)
