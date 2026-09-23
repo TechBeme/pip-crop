@@ -1,21 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
   <title>PiP Crop</title>
   <defs>
-    <linearGradient id="o1-bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#7C3AED"/>
-      <stop offset="1" stop-color="#4338CA"/>
+    <linearGradient id="o2-a" x1="38" y1="14" x2="114" y2="90" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F97316"/>
+      <stop offset="1" stop-color="#EC4899"/>
+    </linearGradient>
+    <linearGradient id="o2-b" x1="14" y1="38" x2="90" y2="114" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#3B82F6"/>
+    </linearGradient>
+    <linearGradient id="o2-p" x1="57" y1="53" x2="75" y2="75" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#EC4899"/>
+      <stop offset="1" stop-color="#8B5CF6"/>
     </linearGradient>
   </defs>
-  <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#o1-bg)"/>
-  <!-- the part of the video that was cropped away -->
-  <path d="M82 38H104a6 6 0 0 1 6 6V84a6 6 0 0 1-6 6H82Z" fill="#fff" fill-opacity=".2"/>
-  <path d="M100 55l-8 9 8 9" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- what the window shows now -->
-  <path d="M24 38H82V90H24a6 6 0 0 1-6-6V44a6 6 0 0 1 6-6Z" fill="#fff"/>
-  <path d="M43 53L63 64L43 75Z" fill="#5B21B6" stroke="#5B21B6" stroke-width="4" stroke-linejoin="round"/>
-  <!-- crop marks -->
-  <g fill="none" stroke="#FBBF24" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 52V32H32"/>
-    <path d="M88 76V96H68"/>
+  <g fill="none" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M38 14V90H114" stroke="url(#o2-a)"/>
+    <path d="M14 38H90V114" stroke="url(#o2-b)"/>
+    <!-- interlock: the orange arm passes over the blue one at the bottom right -->
+    <path d="M80 90H100" stroke="url(#o2-a)" stroke-linecap="butt"/>
   </g>
+  <path d="M57 53L75 64L57 75Z" fill="url(#o2-p)" stroke="url(#o2-p)" stroke-width="5" stroke-linejoin="round"/>
 </svg>

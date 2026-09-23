@@ -2,6 +2,11 @@
 
 All notable changes to PiP Crop. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.3.1] - 2026-09-23
+
+- New logo: the crop tool's two corners with a play button, in the extension
+  icon, the installer and the README.
+
 ## [1.3.0] - 2026-09-23
 
 - Windows installer, `pip-crop-1.3.0-setup.exe`: it finds LibreWolf and
