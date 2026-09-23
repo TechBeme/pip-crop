@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/TechBeme/pip-crop/security/advisories/new
+    about: Report security issues privately.
+  - name: Questions and ideas
+    url: https://github.com/TechBeme/pip-crop/discussions
+    about: Ask for help or discuss an idea.

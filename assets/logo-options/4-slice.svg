@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <title>PiP Crop</title>
+  <defs>
+    <linearGradient id="o4-g" x1="10" y1="38" x2="118" y2="94" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#10B981"/>
+      <stop offset="1" stop-color="#0EA5E9"/>
+    </linearGradient>
+  </defs>
+  <!-- the video that stays -->
+  <path d="M22 38H76V94H22a12 12 0 0 1-12-12V50a12 12 0 0 1 12-12Z" fill="url(#o4-g)"/>
+  <path d="M36 54L56 66L36 78Z" fill="#fff" stroke="#fff" stroke-width="6" stroke-linejoin="round"/>
+  <!-- the slice that was cut off -->
+  <path d="M84 38H98a12 12 0 0 1 12 12V82a12 12 0 0 1-12 12H84Z" fill="#99F6E4" transform="rotate(-8 84 38)"/>
+</svg>

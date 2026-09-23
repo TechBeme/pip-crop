@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <title>PiP Crop</title>
+  <defs>
+    <linearGradient id="o2-a" x1="38" y1="14" x2="114" y2="90" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F97316"/>
+      <stop offset="1" stop-color="#EC4899"/>
+    </linearGradient>
+    <linearGradient id="o2-b" x1="14" y1="38" x2="90" y2="114" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#3B82F6"/>
+    </linearGradient>
+    <linearGradient id="o2-p" x1="57" y1="53" x2="75" y2="75" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#EC4899"/>
+      <stop offset="1" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M38 14V90H114" stroke="url(#o2-a)"/>
+    <path d="M14 38H90V114" stroke="url(#o2-b)"/>
+    <!-- interlock: the orange arm passes over the blue one at the bottom right -->
+    <path d="M80 90H100" stroke="url(#o2-a)" stroke-linecap="butt"/>
+  </g>
+  <path d="M57 53L75 64L57 75Z" fill="url(#o2-p)" stroke="url(#o2-p)" stroke-width="5" stroke-linejoin="round"/>
+</svg>

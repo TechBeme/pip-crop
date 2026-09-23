@@ -1,0 +1,47 @@
+[
+ {
+  "label": "1) native PiP, no crop",
+  "cpu_pct_one_core": 11.7,
+  "gpu": {
+   "security": 0,
+   "3d": 1.04,
+   "vr": 0,
+   "videodecode": 9.66,
+   "copy": 0.01,
+   "ofa_0": 0,
+   "security_1": 0,
+   "legacyoverlay": 0,
+   "videoencode": 0
+  }
+ },
+ {
+  "label": "2) native PiP + chrome crop",
+  "cpu_pct_one_core": 10.7,
+  "gpu": {
+   "security": 0,
+   "3d": 2.35,
+   "vr": 0,
+   "videodecode": 13.45,
+   "copy": 0.01,
+   "ofa_0": 0,
+   "security_1": 0,
+   "legacyoverlay": 0,
+   "videoencode": 0
+  }
+ },
+ {
+  "label": "3) canvas drawImage+captureStream",
+  "cpu_pct_one_core": 97.1,
+  "gpu": {
+   "security": 0,
+   "3d": 8.51,
+   "vr": 0,
+   "videodecode": 7.26,
+   "copy": 0.01,
+   "ofa_0": 0,
+   "security_1": 0,
+   "legacyoverlay": 0,
+   "videoencode": 0
+  }
+ }
+]

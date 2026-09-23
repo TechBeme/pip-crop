@@ -1,0 +1,110 @@
+# Builds and lints the add-on on every push and pull request. A tag vX.Y.Z
+# (matching the version in extension/manifest.json) also publishes a GitHub
+# release with the .xpi, the Firefox AutoConfig zip, updates.json (installed
+# copies check it for updates) and SHA256SUMS.txt.
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      version: ${{ steps.build.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Build
+        id: build
+        env:
+          IS_TAG: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [ "$IS_TAG" = true ]; then
+            python tools/build.py --repo "$GITHUB_REPOSITORY" --expect-version "${REF_NAME#v}"
+          else
+            python tools/build.py --repo "$GITHUB_REPOSITORY"
+          fi
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check src/pipcrop.js
+          node --check dist/extension/api.js
+          node --check dist/firefox-autoconfig/defaults/pref/autoconfig.js
+          # AutoConfig .cfg files are JavaScript
+          cp dist/firefox-autoconfig/pipcrop.cfg "$RUNNER_TEMP/pipcrop.cfg.js"
+          node --check "$RUNNER_TEMP/pipcrop.cfg.js"
+
+      - name: Lint with Mozilla's add-on linter
+        run: python tools/lint.py dist/extension
+
+      - name: Check release notes
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          VERSION: ${{ steps.build.outputs.version }}
+        run: python tools/changelog.py "$VERSION"
+
+      - name: Upload build
+        uses: actions/upload-artifact@v7
+        with:
+          name: pip-crop-${{ steps.build.outputs.version }}
+          path: |
+            dist/*.xpi
+            dist/*.zip
+            dist/updates.json
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download build
+        uses: actions/download-artifact@v8
+        with:
+          name: pip-crop-${{ needs.quality.outputs.version }}
+          path: dist
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ needs.quality.outputs.version }}
+        run: |
+          python tools/changelog.py "$VERSION" > "$RUNNER_TEMP/notes.md"
+          gh release create "$TAG" dist/* --verify-tag \
+            --title "PiP Crop $VERSION" --notes-file "$RUNNER_TEMP/notes.md"

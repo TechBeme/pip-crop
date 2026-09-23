@@ -1,0 +1,7 @@
+[
+  {
+    "namespace": "pipcrop",
+    "description": "Interactive crop for the native Picture-in-Picture window (runs entirely in the parent process).",
+    "functions": []
+  }
+]

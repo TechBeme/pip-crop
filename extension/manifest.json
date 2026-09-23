@@ -1,0 +1,31 @@
+{
+  "manifest_version": 2,
+  "name": "PiP Crop",
+  "version": "1.2.0",
+  "description": "Crop the native Picture-in-Picture window: Shift + drag an edge crops that side and the window shrinks with it. Shift + double-click resets.",
+  "author": "TechBeme",
+  "icons": {
+    "48": "icons/pip-crop.svg",
+    "96": "icons/pip-crop.svg"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "pip-crop@techbeme.github.io",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
+  "experiment_apis": {
+    "pipcrop": {
+      "schema": "schema.json",
+      "parent": {
+        "scopes": ["addon_parent"],
+        "paths": [["pipcrop"]],
+        "script": "api.js",
+        "events": ["startup"]
+      }
+    }
+  }
+}

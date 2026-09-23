@@ -1,0 +1,74 @@
+name: Bug report
+description: Report a reproducible problem in PiP Crop
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping improve PiP Crop. Never include personal browsing data or private videos.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the current and expected behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open a video in Picture-in-Picture
+        2. Hold Shift over the right edge
+        3. Drag ...
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: LibreWolf 156.0 / Firefox 156.0.1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install
+    attributes:
+      label: Install method
+      options:
+        - LibreWolf extension (.xpi)
+        - Firefox AutoConfig (zip)
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: system
+    attributes:
+      label: Operating system and display scale
+      placeholder: Windows 11, 125%
+
+  - type: input
+    id: version
+    attributes:
+      label: PiP Crop version or commit
+      placeholder: 1.2.0 / commit SHA
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Browser Console errors or screenshots
+      description: Errors from the Browser Console (Ctrl + Shift + J). Crop screenshots to the PiP window and remove anything private.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues.
+          required: true
+        - label: I removed personal and private data.
+          required: true

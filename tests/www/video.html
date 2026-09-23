@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>PiP test video</title>
+<style>
+  body { margin: 0; background: #222; color: #ddd; font: 14px sans-serif; }
+  video { display: block; width: 640px; margin: 12px; background: #000; }
+</style>
+</head>
+<body>
+<video id="v" muted loop playsinline controls></video>
+<div id="info"></div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const v = document.getElementById("v");
+  v.src = q.get("src") || "v169.mp4";
+  if (q.get("w")) v.style.width = q.get("w") + "px";
+  document.title = "PiP test " + v.src.split("/").pop();
+  v.play().catch(() => {});
+  v.addEventListener("resize", () => {
+    document.getElementById("info").textContent = `resize: ${v.videoWidth}x${v.videoHeight}`;
+  });
+</script>
+</body>
+</html>

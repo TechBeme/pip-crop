@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>EME ClearKey PiP test</title>
+<style>body{margin:0;background:#222;color:#ddd;font:13px monospace} video{width:640px;margin:12px;background:#000}</style></head>
+<body><video id="v" muted loop playsinline controls></video><div id="log"></div>
+<script>
+const KID = "0123456789abcdef0123456789abcdef", KEY = "00112233445566778899aabbccddeeff";
+const log = (...a) => document.getElementById("log").textContent += a.join(" ") + "\n";
+const b64u = hex => btoa(String.fromCharCode(...hex.match(/../g).map(h => parseInt(h, 16)))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+window.emeState = { keyStatus: null, error: null, playing: false };
+(async () => {
+  try {
+    const video = document.getElementById("v");
+    const type = 'video/mp4; codecs="avc1.640028"';
+    const access = await navigator.requestMediaKeySystemAccess("org.w3.clearkey",
+      [{ initDataTypes: ["cenc"], videoCapabilities: [{ contentType: type }] }]);
+    const keys = await access.createMediaKeys();
+    await video.setMediaKeys(keys);
+    video.addEventListener("encrypted", async e => {
+      const s = keys.createSession();
+      s.addEventListener("keystatuseschange", () => { for (const [, st] of s.keyStatuses) emeState.keyStatus = st; });
+      s.addEventListener("message", async () => {
+        const lic = { keys: [{ kty: "oct", kid: b64u(KID), k: b64u(KEY) }], type: "temporary" };
+        await s.update(new TextEncoder().encode(JSON.stringify(lic)));
+      });
+      await s.generateRequest(e.initDataType, e.initData);
+    });
+    const ms = new MediaSource();
+    video.src = URL.createObjectURL(ms);
+    await new Promise(r => ms.addEventListener("sourceopen", r, { once: true }));
+    const sb = ms.addSourceBuffer(type);
+    sb.appendBuffer(await (await fetch("v169_cenc.mp4")).arrayBuffer());
+    await new Promise(r => sb.addEventListener("updateend", r, { once: true }));
+    await video.play();
+    emeState.playing = true;
+    log("playing EME ClearKey", video.videoWidth, video.videoHeight, "mediaKeys:", !!video.mediaKeys);
+  } catch (e) { emeState.error = String(e); log("ERR", e); }
+})();
+</script></body></html>

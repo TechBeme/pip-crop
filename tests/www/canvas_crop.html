@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>canvas captureStream crop test</title>
+<style>
+  body { margin: 0; background: #222; color: #ddd; font: 13px monospace; }
+  video, canvas { width: 480px; margin: 6px; background: #000; vertical-align: top; }
+  #log { white-space: pre; padding: 6px; }
+</style>
+</head>
+<body>
+<!-- virtual video first in DOM order so the PiP keyboard toggle picks it -->
+<video id="virtual" muted playsinline tabindex="0"></video>
+<video id="src" muted loop playsinline></video>
+<canvas id="cv"></canvas>
+<div id="log"></div>
+<script>
+const q = new URLSearchParams(location.search);
+const src = document.getElementById("src");
+const virt = document.getElementById("virtual");
+const cv = document.getElementById("cv");
+const ctx = cv.getContext("2d");
+src.src = q.get("src") || "v169.mp4";
+if (q.get("crossorigin")) src.crossOrigin = q.get("crossorigin");
+const P = window.__cropPiP = {
+  video: virt, source: src, canvas: cv, stream: null, track: null,
+  crop: { left: 0, right: 0, top: 0, bottom: 0 },        // percent
+  resizeEvents: [], fps: Number(q.get("fps") || 30), frames: 0, drawMs: 0,
+  log(...a) { document.getElementById("log").textContent += a.join(" ") + "\n"; },
+  rect() {
+    const W = src.videoWidth, H = src.videoHeight, c = this.crop;
+    const sx = Math.round(W * c.left / 100), sy = Math.round(H * c.top / 100);
+    const sw = Math.round(W * (100 - c.left - c.right) / 100);
+    const sh = Math.round(H * (100 - c.top - c.bottom) / 100);
+    return { sx, sy, sw, sh };
+  },
+  resizeCanvas() {
+    const { sw, sh } = this.rect();
+    if (cv.width !== sw) cv.width = sw;
+    if (cv.height !== sh) cv.height = sh;
+  },
+  draw() {
+    if (src.readyState < 2) return;
+    const t0 = performance.now();
+    const { sx, sy, sw, sh } = this.rect();
+    this.resizeCanvas();
+    ctx.drawImage(src, sx, sy, sw, sh, 0, 0, sw, sh);
+    this.drawMs += performance.now() - t0; this.frames++;
+  },
+  newStream() {
+    const s = cv.captureStream(this.fps);
+    this.stream = s; this.track = s.getVideoTracks()[0];
+    return s;
+  },
+  X(p) { this.crop.left = this.crop.right = p; this.resizeCanvas(); return this.status(); },
+  L(p) { this.crop.left = p; this.resizeCanvas(); return this.status(); },
+  R(p) { this.crop.right = p; this.resizeCanvas(); return this.status(); },
+  T(p) { this.crop.top = p; this.resizeCanvas(); return this.status(); },
+  B(p) { this.crop.bottom = p; this.resizeCanvas(); return this.status(); },
+  status() {
+    return { crop: { ...this.crop }, canvas: [cv.width, cv.height],
+      trackSettings: this.track ? this.track.getSettings() : null,
+      virtual: [virt.videoWidth, virt.videoHeight], resizeEvents: this.resizeEvents.slice(-5),
+      readyState: virt.readyState, paused: virt.paused };
+  },
+};
+virt.addEventListener("resize", () => P.resizeEvents.push([virt.videoWidth, virt.videoHeight, Math.round(performance.now())]));
+// Variants of the virtual <video>: "dom" (visible), "hidden" (display:none),
+// "tiny" (1x1 px), "detached" (never inserted in the document).
+P.makeVirtual = function (mode) {
+  const v = document.createElement("video");
+  v.muted = true; v.playsInline = true;
+  v.addEventListener("resize", () => P.resizeEvents.push([v.videoWidth, v.videoHeight, Math.round(performance.now())]));
+  if (mode === "hidden") v.style.display = "none";
+  if (mode === "tiny") { v.style.width = "1px"; v.style.height = "1px"; }
+  if (mode !== "detached") document.body.appendChild(v);
+  v.srcObject = P.stream;
+  v.play();
+  P.video = v; P.resizeEvents.length = 0;
+  return mode;
+};
+P.replaceStream = function () {           // recreate captureStream + new srcObject
+  const s = P.newStream(); P.video.srcObject = s; P.video.play(); return P.status();
+};
+P.replaceTrack = function () {            // same MediaStream object, swap the track
+  const old = P.stream.getVideoTracks()[0];
+  const nt = cv.captureStream(P.fps).getVideoTracks()[0];
+  P.stream.addTrack(nt); P.stream.removeTrack(old); old.stop(); P.track = nt; return P.status();
+};
+const btn = document.createElement("button");
+btn.id = "pipbtn"; btn.textContent = "requestPictureInPicture(virtual)";
+btn.onclick = () => P.video.requestPictureInPicture().then(w => P.log("api pip", w.width, w.height)).catch(e => P.log("api pip err", e));
+document.body.prepend(btn);
+src.addEventListener("loadeddata", () => {
+  P.resizeCanvas();
+  P.draw();
+  virt.srcObject = P.newStream();
+  virt.play();
+  const tick = () => { P.draw(); requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+}, { once: true });
+src.play().catch(e => P.log("src play err", e));
+</script>
+</body>
+</html>
