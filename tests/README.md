@@ -78,11 +78,16 @@ if you touch them during it.
 | `t_ext.py` | installs the built `.xpi` without a restart, then restarts the browser |
 | `t_double.py` | a second copy of the module stays inactive |
 | `t_update.py` | the extension updates itself from a local server |
+| `t_installer.py` | the Windows installer: installs into test LibreWolf profiles and a portable Firefox, checks both, uninstalls and checks everything was put back |
 | `perf.py` | CPU and GPU use: native PiP, PiP Crop, canvas route |
 
 `t_ext.py` and `t_update.py` use the build in `dist/`, so run
 `python tools/build.py` first; `t_update.py` needs `--repo`, for
 `dist/updates.json`.
+
+`t_installer.py` needs a test build of the installer, which runs without
+elevation: `ISCC /DAppVersion=X.Y.Z /DTestBuild installer\pip-crop.iss`, then
+`python tests/e2e/t_installer.py dist\pip-crop-X.Y.Z-setup.exe`.
 
 `demo_gif.py` and `screenshots.py` record the README images in
 `docs/images/` (simulated input on real PiP windows).

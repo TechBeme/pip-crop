@@ -19,6 +19,14 @@ python tools/build.py
 
 Install `dist/pip-crop-<version>.xpi` in LibreWolf (see [docs/installation.md](docs/installation.md)), or load `dist/extension/manifest.json` temporarily from `about:debugging`.
 
+The Windows installer is built with [Inno Setup](https://jrsoftware.org/isinfo.php) 6.7 from `installer/pip-crop.iss`, after `python tools/build.py`:
+
+```bash
+ISCC /DAppVersion=1.3.0 installer\pip-crop.iss
+```
+
+Add `/DTestBuild` for a build that runs without elevation and accepts test targets (`tests/e2e/t_installer.py` uses it). `installer/make_art.py` renders the installer artwork from `assets/logo.svg`.
+
 ## Quality checks
 
 Run the same checks as CI before opening a pull request:
@@ -50,7 +58,7 @@ For changes to the crop or the gesture, run the end-to-end tests on Windows ([te
    git push origin v1.2.0
    ```
 
-The [CI workflow](.github/workflows/ci.yml) checks that the tag matches the version, builds and lints the add-on and publishes a GitHub release with the `.xpi`, the Firefox AutoConfig zip, `updates.json` and checksums. Installed copies update themselves from `updates.json`.
+The [CI workflow](.github/workflows/ci.yml) checks that the tag matches the version, builds and lints the add-on, builds the Windows installer and publishes a GitHub release with the installer, the `.xpi`, the Firefox AutoConfig zip, `updates.json` and checksums. Installed copies update themselves from `updates.json`.
 
 ## Commit style
 

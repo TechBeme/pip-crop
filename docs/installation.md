@@ -2,12 +2,12 @@
 
 PiP Crop changes the browser's own Picture-in-Picture window, which the
 normal WebExtension APIs cannot reach. It therefore runs as privileged code,
-and how you install it depends on the browser:
+and how it is loaded depends on the browser:
 
 | Browser | Package | Updates |
 |---|---|---|
-| LibreWolf (Windows) | `pip-crop-<version>.xpi` | automatic, from GitHub releases |
-| Firefox release (Windows) | `pip-crop-<version>-firefox-autoconfig.zip` | run the installer of the new version |
+| LibreWolf (Windows) | installer, or `pip-crop-<version>.xpi` | automatic, from GitHub releases |
+| Firefox release (Windows) | installer, or `pip-crop-<version>-firefox-autoconfig.zip` | run the installer of the new version |
 | Firefox Developer Edition, Nightly | `pip-crop-<version>.xpi` (untested) | automatic |
 
 Requirements: Windows 10 or 11 and a browser based on Firefox 140 or newer.
@@ -16,7 +16,41 @@ displays at 100 % and 125 %.
 
 Download the files from the [latest release](https://github.com/TechBeme/pip-crop/releases/latest).
 
-## LibreWolf
+## Installer (recommended)
+
+Run `pip-crop-<version>-setup.exe`, click **Next**, check the browsers and
+click **Install**. Windows asks for permission (Firefox's folder is
+protected). When it finishes, close the browser completely and open it again.
+
+Windows may show "Windows protected your PC", because the installer is not
+signed with a paid certificate: click **More info**, then **Run anyway**. The
+installer is built by GitHub Actions from this repository, and the release's
+`SHA256SUMS.txt` has its checksum.
+
+What it changes, and what Settings → Apps → PiP Crop → Uninstall puts back:
+
+| Browser | Change |
+|---|---|
+| LibreWolf, every profile listed in `%APPDATA%\librewolf\profiles.ini` | copies the extension to `extensions\pip-crop@techbeme.github.io.xpi` and adds four prefs to `user.js`, between `// >>> PiP Crop` and `// <<< PiP Crop` |
+| Firefox, each installation it finds | copies the three AutoConfig files described [below](#firefox-release-without-the-installer) |
+
+The four LibreWolf prefs let LibreWolf load an unsigned extension with an
+experimental API (`xpinstall.signatures.required = false`,
+`extensions.experiments.enabled = true`) and pick up the extension file from
+the profile without asking (`extensions.startupScanScopes = 1`,
+`extensions.autoDisableScopes = 14`). The installer remembers any values you
+had set for them before and restores those values on uninstall.
+
+The installer does not need the browser to be closed. It cannot help when:
+
+- LibreWolf was never opened, so it has no profile yet: open it once, then
+  run the installer again;
+- Firefox already uses AutoConfig for something else, such as a
+  userChrome.js loader (see [below](#if-you-already-use-autoconfig));
+- the browser is the Microsoft Store version of Firefox or a portable
+  LibreWolf: use the manual steps.
+
+## LibreWolf, without the installer
 
 1. Open `about:config` and set:
    - `xpinstall.signatures.required` to `false`
@@ -34,7 +68,7 @@ like any other add-on update (the download is verified with a SHA-256 hash).
 
 **Uninstall** from `about:addons`.
 
-## Firefox (release)
+## Firefox (release), without the installer
 
 Firefox release only runs extensions signed by Mozilla, so PiP Crop is loaded
 by Firefox's [AutoConfig](https://support.mozilla.org/kb/customizing-firefox-using-autoconfig):

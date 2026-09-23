@@ -2,6 +2,13 @@
 
 All notable changes to PiP Crop. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.3.0] - 2026-09-23
+
+- Windows installer, `pip-crop-1.3.0-setup.exe`: it finds LibreWolf and
+  Firefox, adds PiP Crop to the ones you check and needs no manual steps. It
+  is in English, Portuguese and Spanish, and Settings → Apps → PiP Crop
+  removes everything it changed.
+
 ## [1.2.0] - 2026-09-22
 
 First public release.

@@ -12,8 +12,9 @@ FILES = """
 
 | Browser | File |
 |---|---|
-| LibreWolf (and other builds that allow unsigned extensions) | `pip-crop-{v}.xpi` |
-| Firefox (release) on Windows | `pip-crop-{v}-firefox-autoconfig.zip` |
+| **LibreWolf or Firefox on Windows (easiest)** | `pip-crop-{v}-setup.exe`: run it and restart the browser |
+| LibreWolf, manual install | `pip-crop-{v}.xpi` |
+| Firefox (release), manual install | `pip-crop-{v}-firefox-autoconfig.zip` |
 
 Installation steps are in the {readme}.
 `SHA256SUMS.txt` has the checksums; `updates.json` is the update manifest that
@@ -30,6 +31,7 @@ def main():
     m = re.search(rf"^## \[?{re.escape(version)}\]?[^\n]*\n(.*?)(?=^## |\Z)", text, re.M | re.S)
     if not m or not m.group(1).strip():
         sys.exit(f"changelog.py: CHANGELOG.md has no section for {version}")
+    sys.stdout.reconfigure(encoding="utf-8")
     repo = os.environ.get("GITHUB_REPOSITORY")
     readme = f"[installation guide](https://github.com/{repo}/blob/main/docs/installation.md)" if repo else "installation guide (docs/installation.md)"
     print(m.group(1).strip() + "\n" + FILES.format(v=version, readme=readme))

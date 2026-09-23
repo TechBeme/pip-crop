@@ -62,8 +62,8 @@ PiP Crop is an open-source add-on for Firefox and LibreWolf that crops the brows
 
 | Browser | Platform | Package | Updates | Status |
 | --- | --- | --- | --- | --- |
-| LibreWolf 140+ | Windows | `.xpi` extension | Automatic | Tested on 156.0 |
-| Firefox 140+ (release) | Windows | AutoConfig zip + installer | Run the new installer | Tested on 156.0.1 |
+| LibreWolf 140+ | Windows | Installer or `.xpi` | Automatic | Tested on 156.0 |
+| Firefox 140+ (release) | Windows | Installer or AutoConfig zip | Run the new installer | Tested on 156.0.1 |
 | Firefox Developer Edition / Nightly | Windows | `.xpi` extension | Automatic | Should work, untested |
 | Linux and macOS | | | | Fallback without native input, untested |
 
@@ -81,6 +81,7 @@ Tested on Windows 11 with displays at 100% and 125%. [Installation](docs/install
 - Works with cross-origin, CORS-less and DRM (EME) video
 - An outline shows while Shift is held over the window
 - Alt instead of Shift, as an option (`extensions.pipcrop.modifier`)
+- A one-click Windows installer for LibreWolf and Firefox, in English, Portuguese and Spanish
 - Automatic updates from GitHub releases in LibreWolf
 - No data collection and no network requests of its own
 
@@ -90,11 +91,13 @@ Tested on Windows 11 with displays at 100% and 125%. [Installation](docs/install
 [![WebExtension Experiment](https://img.shields.io/badge/Gecko-WebExtension_Experiment-ff7139?logo=firefoxbrowser&logoColor=white)](https://firefox-source-docs.mozilla.org/toolkit/components/extensions/webextensions/basics.html#adding-experimental-apis-in-privileged-extensions)
 [![Win32](https://img.shields.io/badge/Windows-Win32_js--ctypes-0078d4)](docs/architecture.md)
 [![Python](https://img.shields.io/badge/Python-build_&_tests-3776ab?logo=python&logoColor=white)](tools/build.py)
+[![Inno Setup](https://img.shields.io/badge/Inno_Setup-installer-264de4)](installer/pip-crop.iss)
 [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-CI_&_releases-2088ff?logo=githubactions&logoColor=white)](.github/workflows/ci.yml)
 
 - One privileged JavaScript module, [`src/pipcrop.js`](src/pipcrop.js), with no dependencies
 - A WebExtension Experiment wrapper for LibreWolf and an AutoConfig loader for Firefox release
 - js-ctypes calls into Win32: `GetAsyncKeyState`, `GetCursorPos`, `WM_NCHITTEST`, `WM_GETMINMAXINFO`, `GetGUIThreadInfo`
+- An Inno Setup installer that edits the selected browsers and undoes every change on uninstall
 - A reproducible Python build, Mozilla's add-on linter, and GitHub Actions releases with a self-hosted `updates.json`
 - End-to-end tests on a real browser through Marionette, checked against screenshots
 
@@ -120,26 +123,22 @@ See [Architecture](docs/architecture.md) for the gesture, the Windows details an
 ### Prerequisites
 
 - Windows 10 or 11
-- LibreWolf or Firefox 140 or newer (tested on 156)
+- LibreWolf or Firefox 140 or newer (tested on 156), opened at least once
 
-### 1. Download the latest release
+### 1. Download the installer
 
-Get the files from the [latest release](https://github.com/TechBeme/pip-crop/releases/latest):
+Download `pip-crop-<version>-setup.exe` from the [latest release](https://github.com/TechBeme/pip-crop/releases/latest).
 
-- LibreWolf: `pip-crop-<version>.xpi`
-- Firefox: `pip-crop-<version>-firefox-autoconfig.zip`
+### 2. Run it
 
-### 2. Install
+Open the file and click **Next**, then **Install**. The installer finds LibreWolf and Firefox by itself and adds PiP Crop to the ones you check. Windows asks for permission, because Firefox's folder is protected: click **Yes**.
 
-**LibreWolf.** In `about:config`, set `xpinstall.signatures.required` to `false` and `extensions.experiments.enabled` to `true`. Then open `about:addons`, click the gear icon, choose **Install Add-on From File…** and pick the `.xpi`.
+When it finishes, close the browser completely and open it again.
 
-**Firefox.** Extract the zip, open PowerShell **as Administrator** in that folder and run:
+> [!NOTE]
+> Windows may show "Windows protected your PC", because the installer is not signed with a paid certificate. Click **More info**, then **Run anyway**. The installer is built by GitHub Actions from this repository's code, and the release's `SHA256SUMS.txt` has its checksum.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File install.ps1
-```
-
-Restart Firefox. Run `install.ps1 -Uninstall` to remove it.
+To remove PiP Crop, go to Settings → Apps → Installed apps → PiP Crop → Uninstall.
 
 ### 3. Crop a PiP window
 
@@ -151,6 +150,18 @@ Open any video in Picture-in-Picture, then:
 | **Shift** + drag outward | Uncrops, up to the edge of the video |
 | **Shift** + double-click | Removes the crop |
 | Drag an edge or corner | Normal proportional resize; the crop is kept |
+
+### Manual installation
+
+**LibreWolf.** In `about:config`, set `xpinstall.signatures.required` to `false` and `extensions.experiments.enabled` to `true`. Then open `about:addons`, click the gear icon, choose **Install Add-on From File…** and pick `pip-crop-<version>.xpi`.
+
+**Firefox.** Extract `pip-crop-<version>-firefox-autoconfig.zip`, open PowerShell **as Administrator** in that folder and run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File install.ps1
+```
+
+Restart Firefox. Run `install.ps1 -Uninstall` to remove it.
 
 ### Build from source
 
@@ -169,7 +180,7 @@ Extensions on addons.mozilla.org can only use the WebExtension APIs, and none of
 - addons.mozilla.org rejects experiments with "You cannot submit this type of add-on", and its linter reports `MANIFEST_FIELD_PRIVILEGED` for them.
 - Firefox release ignores experiments that Mozilla has not signed as privileged.
 
-So PiP Crop is distributed from GitHub releases: the `.xpi` for LibreWolf, with automatic updates, and the AutoConfig package for Firefox.
+So PiP Crop is distributed from GitHub releases: a Windows installer for both browsers, plus the `.xpi` for LibreWolf (with automatic updates) and the AutoConfig package for Firefox.
 
 > [!WARNING]
 > PiP Crop runs with the browser's full privileges, like every WebExtension Experiment and AutoConfig script. Install it only from this repository's releases, or build it from source you have reviewed. All of the code is in one readable file, [`src/pipcrop.js`](src/pipcrop.js).
@@ -181,6 +192,7 @@ So PiP Crop is distributed from GitHub releases: the `.xpi` for LibreWolf, with 
 | `python tools/build.py` | Build the `.xpi` and the Firefox AutoConfig zip into `dist/` |
 | `python tools/build.py --repo OWNER/NAME` | Also set the homepage and update URL and write `updates.json` |
 | `python tools/lint.py` | Run Mozilla's add-on linter (needs Node.js) |
+| `ISCC /DAppVersion=1.3.0 installer\pip-crop.iss` | Build the Windows installer (Inno Setup 6.7) |
 | `python tools/changelog.py 1.2.0` | Print the release notes of a version |
 | `python tests/e2e/t_sim.py` | Run the gesture tests on a real browser (Windows) |
 

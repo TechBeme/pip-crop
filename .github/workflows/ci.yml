@@ -1,7 +1,8 @@
-# Builds and lints the add-on on every push and pull request. A tag vX.Y.Z
-# (matching the version in extension/manifest.json) also publishes a GitHub
-# release with the .xpi, the Firefox AutoConfig zip, updates.json (installed
-# copies check it for updates) and SHA256SUMS.txt.
+# Builds and lints the add-on and builds the Windows installer on every push
+# and pull request. A tag vX.Y.Z (matching the version in
+# extension/manifest.json) also publishes a GitHub release with the installer,
+# the .xpi, the Firefox AutoConfig zip, updates.json (installed copies check it
+# for updates) and SHA256SUMS.txt.
 name: CI
 
 on:
@@ -81,9 +82,52 @@ jobs:
             dist/SHA256SUMS.txt
           if-no-files-found: error
 
+  installer:
+    needs: quality
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Build
+        run: python tools/build.py --repo "$env:GITHUB_REPOSITORY"
+
+      - name: Install Inno Setup
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download is-6_7_3 -R jrsoftware/issrc -p innosetup-6.7.3.exe -D "$env:RUNNER_TEMP"
+          $exe = Join-Path $env:RUNNER_TEMP "innosetup-6.7.3.exe"
+          $sig = Get-AuthenticodeSignature $exe
+          if ($sig.Status -ne "Valid" -or $sig.SignerCertificate.Subject -notmatch "Pyrsys B\.V\.") {
+            throw "Unexpected Inno Setup signature: $($sig.Status) $($sig.SignerCertificate.Subject)"
+          }
+          Start-Process $exe -Wait -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/CURRENTUSER", "/PORTABLE=1", "/DIR=$env:RUNNER_TEMP\innosetup"
+
+      - name: Build the installer
+        env:
+          VERSION: ${{ needs.quality.outputs.version }}
+        run: |
+          & "$env:RUNNER_TEMP\innosetup\ISCC.exe" /Q "/DAppVersion=$env:VERSION" installer\pip-crop.iss
+          if ($LASTEXITCODE -ne 0) { throw "ISCC failed with exit code $LASTEXITCODE" }
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v7
+        with:
+          name: pip-crop-setup-${{ needs.quality.outputs.version }}
+          path: dist/*-setup.exe
+          if-no-files-found: error
+
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: quality
+    needs: [quality, installer]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -93,10 +137,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Download build
+      - name: Download builds
         uses: actions/download-artifact@v8
         with:
-          name: pip-crop-${{ needs.quality.outputs.version }}
+          pattern: pip-crop-*${{ needs.quality.outputs.version }}
+          merge-multiple: true
           path: dist
 
       - name: Publish GitHub release
@@ -105,6 +150,7 @@ jobs:
           TAG: ${{ github.ref_name }}
           VERSION: ${{ needs.quality.outputs.version }}
         run: |
+          (cd dist && sha256sum -- *-setup.exe >> SHA256SUMS.txt)
           python tools/changelog.py "$VERSION" > "$RUNNER_TEMP/notes.md"
           gh release create "$TAG" dist/* --verify-tag \
             --title "PiP Crop $VERSION" --notes-file "$RUNNER_TEMP/notes.md"

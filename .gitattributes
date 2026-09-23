@@ -3,3 +3,6 @@
 *.png binary
 *.xpi binary
 *.zip binary
+*.iss text eol=crlf
+*.ico binary
+*.exe binary
